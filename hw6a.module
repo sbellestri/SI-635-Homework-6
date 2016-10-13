@@ -1,0 +1,98 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: sbellestri
+ * Date: 10/13/16
+ * Time: 10:17 AM
+ */
+
+function hw6a_menu() {
+    $items = array();
+    $items['hw6a'] = array(
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('hw6a_simple_form'),
+        'title' => 'SI635 Homework 6a',
+        'access callback' => TRUE,
+    );
+    return $items;
+}
+
+function hw6a_simple_form($form, &$form_state) {
+    //create the form fields
+    $form = array();
+    //get name... limit size to 50
+    $form['name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('What is your name?'),
+        '#required' => TRUE,
+        '#size' => 50,
+    );
+    //get age
+    $form['age'] = array(
+        '#type' => 'textfield',
+        '#title' => t('What is your age?'),
+        '#required' => TRUE,
+        '#size' => 3,
+    );
+    //get browser
+    $form['browser'] = array(
+        '#type' => 'radios',
+        '#title' => t('Which web browser do you use most from the options below?'),
+        '#options' => array(
+            'chrome' => t('Google Chrome'),
+            'firefox' => t('Mozilla Firefox'),
+            'explorer' => t('Internet Explorer'),
+            'safari' => t('Safari'),
+            'opera' => t('Opera'),
+        ),
+        '#required' => TRUE,
+    );
+    //get search engine
+    $form['search'] = array(
+        '#type' => 'radios',
+        '#title' => t('Which search engine do you use most from the options below?'),
+        '#options' => array(
+            'google' => t('Google'),
+            'bing' => t('Bing'),
+            'yahoo' => t('Yahoo'),
+            'ask' => t('Ask.com'),
+            'aol' => t('AOL.com'),
+        ),
+        '#required' => TRUE,
+    );
+    //submit handler
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'submit',
+    );
+    return $form;
+}
+
+function hw6a_simple_form_validate($form, &$form_state) {
+    //validate length of name field
+    if (strlen($form_state['values']['name']) > 30) {
+        form_set_error('name', t('Please limit the name field to 30 characters or less.'));
+    }
+    //validate that the age given is a number
+    if (!is_numeric($form_state['values']['age'])) {
+        form_set_error('age', t('Please enter a valid age'));
+    }
+    //validate that the age given is realistic
+    elseif($form_state['values']['age'] > 125 || $form_state['values']['age'] < 13) {
+        form_set_error('age', t('Please enter an age between 13 and 125.'));
+    }
+}
+
+function hw6a_simple_form_submit($form, &$form_state) {
+    //output message
+    $message = t("Your name is @name and you are @age years old. Your favorite web browser is @browser and your favorite search engine is @search.", array(
+        '@name' => $form_state['values']['name'],
+        '@age' => $form_state['values']['age'],
+        '@browser' => $form_state['values']['browser'],
+        '@search' => $form_state['values']['search'],
+    ));
+    //tweet response
+    si635_helper_tweet($message);
+    //display response
+    drupal_set_message($message);
+}

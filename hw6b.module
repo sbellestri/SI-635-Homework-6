@@ -1,0 +1,97 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: sbellestri
+ * Date: 10/13/16
+ * Time: 10:18 AM
+ */
+
+function hw6b_menu() {
+    $items = array();
+    $items['hw6b'] = array(
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('hw6b_simple_form'),
+        'title' => 'SI635 Homework 6b',
+        'access callback' => TRUE,
+    );
+    return $items;
+}
+
+function hw6b_simple_form($form, &$form_state) {
+    //create the form fields
+    $form = array();
+    //get name... limit size to 50
+    $form['name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('What is your name?'),
+        '#required' => TRUE,
+        '#size' => 30,
+    );
+    //get age
+    $form['age'] = array(
+        '#type' => 'textfield',
+        '#title' => t('What is your age?'),
+        '#required' => TRUE,
+        '#size' => 3,
+    );
+    //get airlines
+    $form['airline'] = array(
+        '#type' => 'radios',
+        '#title' => t('What is your favorite airline from the options below?'),
+        '#options' => array(
+            'american' => t('American Airlines'),
+            'delta' => t('Delta Air Lines'),
+            'southwest' => t('Southwest Airlines'),
+            'united' => t('United Airlines'),
+            'spirit' => t('Spirit Airlines'),
+        ),
+        '#required' => TRUE,
+    );
+    //get favorite travel destination
+    $form['destination'] = array(
+        '#type' => 'textfield',
+        '#title' => t('What is your favorite travel destination?'),
+        '#required' => TRUE,
+        '#size' => 25,
+        '#description' => t('Please limit response to 25 characters'),
+    );
+    //submit handler
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'submit',
+    );
+    return $form;
+}
+
+function hw6b_simple_form_validate($form, &$form_state) {
+    //validate length of name field
+    if (strlen($form_state['values']['name']) > 30) {
+        form_set_error('name', t('Please limit the name field to 30 characters or less.'));
+    }
+    //validate that the age given is a number
+    if (!is_numeric($form_state['values']['age'])) {
+        form_set_error('age', t('Please enter a valid age'));
+    }
+    //validate that the age given is realistic
+    elseif($form_state['values']['age'] > 125 || $form_state['values']['age'] < 13) {
+        form_set_error('age', t('Please enter an age between 13 and 125.'));
+    }
+    //validate the destination length
+    if (strlen($form_state['values']['destination']) > 25) {
+        form_set_error('destination', t('Please limit your favorite travel destination response to 25 characters or less.'));
+    }
+}
+
+function hw6b_simple_form_submit($form, &$form_state) {
+    //output message
+    $message = t("Your name is @name and you are @age years old. Your favorite airline is @airline and your favorite travel destination is @destination.", array(
+        '@name' => $form_state['values']['name'],
+        '@age' => $form_state['values']['age'],
+        '@airline' => $form_state['values']['airline'],
+        '@destination' => $form_state['values']['destination'],
+    ));
+    //tweet response
+    si635_helper_tweet($message);
+    //display response
+    drupal_set_message($message);
+}
